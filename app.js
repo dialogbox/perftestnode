@@ -15,8 +15,12 @@ function getMedian(args) {
   return isEven ? (numbers[middle] + numbers[middle - 1]) / 2 : numbers[middle];
 }
 
-function last(args) {
-  return args[args.length-1]
+function average(args) {
+  var sum = 0
+  for (i = 0; i < args.length; i++) {
+    sum += args[i]
+  }
+  return sum/args.length
 }
 
 function makeData(sample_size) {
@@ -29,28 +33,28 @@ function makeData(sample_size) {
   return l
 }
 
-app.use(morgan('combined'))
+// app.use(morgan('combined'))
 
-app.get('/gen/:sample_size', function (req, res) {
+app.get('/perftest/gen/:sample_size', function (req, res) {
   var l = makeData(req.params.sample_size)
   res.send({Data: l})
 })
 
-app.get('/get/:sample_size?', function (req, res) {
+app.get('/perftest/get/:sample_size?', function (req, res) {
   var sample_size = req.params.sample_size || 100
   var l = makeData(sample_size, false)
 
   var server = http.get({
     host: host,
     port: port,
-    path: '/gen/' + sample_size
+    path: '/perftest/gen/' + sample_size
   }, function(response) {
     let rawData = ''
     response.on('data', (d) => rawData += d)
     response.on('end', () => {
       let body = JSON.parse(rawData)
       // var m = getMedian(body.Data)
-      var m = last(body.Data)
+      var m = average(body.Data)
       res.send({SampleSize: sample_size, Median: m})
     })
   })
